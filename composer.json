@@ -1,0 +1,20 @@
+{
+  "name": "enrise/soy-symfony-build-parameters-task",
+  "description": "Soy Symfony Build Parameters Task",
+  "license": "MIT",
+  "require": {
+    "soy-php/soy": ">=0.1.0",
+    "soy-php/replace-task": ">=0.1.0",
+    "symfony/yaml": "^2.0|^3.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "Enrise\\Soy\\SymfonyBuildParameters\\": "src/Enrise/Soy/SymfonyBuildParameters/"
+    }
+  },
+  "extra": {
+    "branch-alias": {
+      "dev-develop": "0.1.x-dev"
+    }
+  }
+}
