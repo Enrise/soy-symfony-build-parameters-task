@@ -3,7 +3,7 @@
   "description": "Soy Symfony Build Parameters Task",
   "license": "MIT",
   "require": {
-    "soy-php/soy": ">=0.1.0",
+    "soy-php/soy": ">=0.2.0",
     "soy-php/replace-task": ">=0.1.0",
     "symfony/yaml": "^2.0|^3.0"
   },

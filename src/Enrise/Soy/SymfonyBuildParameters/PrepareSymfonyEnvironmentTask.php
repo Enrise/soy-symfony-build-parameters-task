@@ -7,8 +7,6 @@ use Soy\Task\TaskInterface;
 
 class PrepareSymfonyEnvironmentTask implements TaskInterface
 {
-    const CLI_ARG_ENV_FILE = 'env-file';
-
     /**
      * @var PrepareEnvironmentTask
      */
@@ -31,7 +29,6 @@ class PrepareSymfonyEnvironmentTask implements TaskInterface
     public function __construct(PrepareEnvironmentTask $prepareEnvironmentTask, CLImate $climate)
     {
         $prepareEnvironmentTask->setSourceFile('app/config/parameters.yml.dist');
-        $prepareEnvironmentTask->setDestinationFile('app/config/parameters.yml');
 
         $this->prepareEnvironmentTask = $prepareEnvironmentTask;
         $this->climate = $climate;
@@ -42,7 +39,7 @@ class PrepareSymfonyEnvironmentTask implements TaskInterface
      */
     public function run()
     {
-        $envFile = $this->climate->arguments->get(self::CLI_ARG_ENV_FILE);
+        $envFile = $this->climate->arguments->get(PrepareEnvironmentTask::CLI_ARG_ENV_FILE);
         if ($envFile !== null) {
             $this->environmentFile = $envFile;
         }
@@ -59,20 +56,14 @@ class PrepareSymfonyEnvironmentTask implements TaskInterface
      * When linked as callback for Soy's prepare, adds a command line argument for this task.
      *
      * @param CLImate $climate
-     * @return CLImate
      * @throws \Exception
      */
     public static function prepareCli(CLImate $climate)
     {
-        $climate->arguments->add([
-            self::CLI_ARG_ENV_FILE => [
-                'longPrefix' => self::CLI_ARG_ENV_FILE,
-                'description' => 'The environment file that contains the parameters',
-                'required' => false
-            ]
-        ]);
-
-        return $climate;
+        $args = $climate->arguments->all();
+        $output = $args[PrepareEnvironmentTask::CLI_ARG_DEST_FILE];
+        $output->setDefaultValue('app/config/parameters.yml');
+        $output->setValue('app/config/parameters.yml');
     }
 
     /**

@@ -86,7 +86,6 @@ class ParametersTask implements TaskInterface
     private function readParamsFromFile($filename)
     {
         $environmentContents = file_get_contents($filename);
-        $environmentParameters = Yaml::parse($environmentContents);
-        return $environmentParameters;
+        return Yaml::parse($environmentContents);
     }
 }
