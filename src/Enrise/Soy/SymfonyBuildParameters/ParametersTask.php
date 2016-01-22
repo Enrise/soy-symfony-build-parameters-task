@@ -17,6 +17,21 @@ class ParametersTask implements TaskInterface
     const ENVIRONMENT_FILE_PATH_DEFAULT = 'files/environment';
 
     /**
+     * @var string
+     */
+    private $env;
+
+    /**
+     * @var string
+     */
+    private $envFile;
+
+    /**
+     * @var string
+     */
+    private $globalEnvFile;
+
+    /**
      * @var array
      */
     private $parameters = [];
@@ -39,25 +54,38 @@ class ParametersTask implements TaskInterface
      */
     public function run()
     {
+        $this->climate->green('Running ' . self::class);
 
-        $envFile = $this->getEnvFilename();
-
-        if (! is_readable($envFile)) {
-            $this->climate->red('Unable to read file: ' . $envFile);
-            exit;
+        if (! $this->getEnv()) {
+            $this->setEnv($this->climate->arguments->get(static::CLI_ARG_ENV));
         }
 
-        $envParams = $this->readParamsFromFile($envFile);
+        if (! $this->getEnvFile()) {
+            $this->setEnvFile($this->getEnvFilename());
+        }
 
-        $globalFile = $this->getEnvFilename('global');
+        if (! is_readable($this->getEnvFile())) {
+            $this->climate->tab()->red('Unable to read file: ' . $this->getEnvFile());
+            die(21);
+        }
 
-        if (! is_readable($globalFile)) {
-            $this->climate->yellow('No global file found, proceeding without it. File tried: ' . $globalFile);
+        $this->climate->tab()->white('Read environment file ' . $this->getEnvFile());
+        $envParams = $this->readParamsFromFile($this->getEnvFile());
+
+        if (! $this->getGlobalEnvFile()) {
+            $this->setGlobalEnvFile($this->getEnvFilename('global'));
+        }
+
+        if (! is_readable($this->getGlobalEnvFile())) {
+            $this->climate->tab()->yellow(
+                'No global file found, proceeding without it. Tried file: ' . $this->getGlobalEnvFile()
+            );
         }
 
         $distEnvironmentParameters = [];
-        if (is_readable($globalFile)) {
-            $distEnvironmentParameters = $this->readParamsFromFile($globalFile);
+        if (is_readable($this->getGlobalEnvFile())) {
+            $this->climate->tab()->white('Read global environment file ' . $this->getGlobalEnvFile());
+            $distEnvironmentParameters = $this->readParamsFromFile($this->getGlobalEnvFile());
         }
 
         if (is_array($distEnvironmentParameters)) {
@@ -88,6 +116,57 @@ class ParametersTask implements TaskInterface
     }
 
     /**
+     * @return string
+     */
+    public function getEnv()
+    {
+        return $this->env;
+    }
+
+    /**
+     * @param string $env
+     */
+    public function setEnv($env)
+    {
+        $this->env = $env;
+    }
+
+    /**
+     * @return string
+     */
+    public function getEnvFile()
+    {
+        return $this->envFile;
+    }
+
+    /**
+     * @param string $envFile
+     */
+    public function setEnvFile($envFile)
+    {
+        $this->envFile = $envFile;
+    }
+
+    /**
+     * @return string
+     */
+    public function getGlobalEnvFile()
+    {
+        return $this->globalEnvFile;
+    }
+
+    /**
+     * @param string $globalEnvFile
+     * @return $this
+     */
+    public function setGlobalEnvFile($globalEnvFile)
+    {
+        $this->globalEnvFile = $globalEnvFile;
+
+        return $this;
+    }
+
+    /**
      * @param string $env
      * @return string
      */
@@ -96,7 +175,7 @@ class ParametersTask implements TaskInterface
         $args = $this->climate->arguments;
 
         if ($env === null) {
-            $env = $args->get(static::CLI_ARG_ENV);
+            $env = $this->getEnv();
         }
 
         $path = $args->get(static::CLI_ARG_ENV_PATH);

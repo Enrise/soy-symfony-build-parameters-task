@@ -65,6 +65,8 @@ class PrepareEnvironmentTask implements TaskInterface
      */
     public function run()
     {
+        $this->climate->green('Running ' . self::class);
+
         if (! $this->destinationFile) {
             $this->destinationFile = $this->climate->arguments->get(self::CLI_ARG_DEST_FILE);
         }
@@ -76,6 +78,16 @@ class PrepareEnvironmentTask implements TaskInterface
         if ($this->sourceFile === null || $this->destinationFile === null) {
             $exceptionMessage = sprintf('Please provide a source and destination file for %s', self::class);
             throw new \RuntimeException($exceptionMessage);
+        }
+
+        $this->climate->tab()->white('Template file ' . $this->sourceFile);
+        if (! is_readable($this->sourceFile)) {
+            $this->climate->tab()->red('Unable to read file: ' . $this->sourceFile);
+            die(22);
+        }
+        $this->climate->tab()->white('Destination file ' . $this->destinationFile);
+        if (file_exists($this->destinationFile)) {
+            $this->climate->tab()->yellow('Destination file will be replaced');
         }
 
         $this->parametersTask->run();
@@ -95,7 +107,7 @@ class PrepareEnvironmentTask implements TaskInterface
         $this->replaceTask->run();
 
         if (is_readable($this->destinationFile)) {
-            $this->climate->blue($this->destinationFile . ' file generated successfully');
+            $this->climate->bold()->blue($this->destinationFile . ' file generated successfully');
         }
     }
 

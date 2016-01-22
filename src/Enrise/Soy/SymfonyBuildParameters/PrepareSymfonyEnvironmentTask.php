@@ -7,6 +7,8 @@ use Soy\Task\TaskInterface;
 
 class PrepareSymfonyEnvironmentTask implements TaskInterface
 {
+    const ENV_VAR_SYMFONY = 'SYMFONY_ENV';
+
     const CLI_ARG_ENV_DEFAULT = 'dev';
 
     const CLI_ARG_DEST_FILE_DEFAULT = 'app/config/parameters.yml';
@@ -24,17 +26,22 @@ class PrepareSymfonyEnvironmentTask implements TaskInterface
     private $climate;
 
     /**
-     * @var string|null
+     * @var ParametersTask
      */
-    private $environmentFile;
+    private $parametersTask;
 
     /**
      * @param PrepareEnvironmentTask $prepareEnvironmentTask
+     * @param ParametersTask $parametersTask
      * @param CLImate $climate
      */
-    public function __construct(PrepareEnvironmentTask $prepareEnvironmentTask, CLImate $climate)
-    {
+    public function __construct(
+        PrepareEnvironmentTask $prepareEnvironmentTask,
+        ParametersTask $parametersTask,
+        CLImate $climate
+    ) {
         $this->prepareEnvironmentTask = $prepareEnvironmentTask;
+        $this->parametersTask = $parametersTask;
         $this->climate = $climate;
     }
 
@@ -43,6 +50,26 @@ class PrepareSymfonyEnvironmentTask implements TaskInterface
      */
     public function run()
     {
+        $this->climate->green('Running ' . self::class);
+
+        if (getenv(self::ENV_VAR_SYMFONY) &&
+            ! $this->climate->arguments->get(ParametersTask::CLI_ARG_ENV) &&
+            ! $this->parametersTask->getEnv()
+        ) {
+            $this->parametersTask->setEnv(getenv(self::ENV_VAR_SYMFONY));
+            $this->climate->tab()->white(
+                'Symfony Environment detected as "' . $this->parametersTask->getEnv() . '"'
+            );
+        }
+
+        if (! $this->climate->arguments->get(ParametersTask::CLI_ARG_ENV) &&
+            ! $this->parametersTask->getEnv()
+        ) {
+            $this->parametersTask->setEnv(static::CLI_ARG_ENV_DEFAULT);
+            $this->climate->tab()->white(
+                'Symfony Environment is falling back to default "' . $this->parametersTask->getEnv() . '"'
+            );
+        }
 
         $this->prepareEnvironmentTask->setEnclosingParamSymbol('%');
         $this->prepareEnvironmentTask->run();
@@ -70,25 +97,5 @@ class PrepareSymfonyEnvironmentTask implements TaskInterface
 
         $env = $args[ParametersTask::CLI_ARG_ENV];
         $env->setDefaultValue(static::CLI_ARG_ENV_DEFAULT);
-        $env->setValue(static::CLI_ARG_ENV_DEFAULT);
-    }
-
-    /**
-     * @return null|string
-     */
-    public function getEnvironmentFile()
-    {
-        return $this->environmentFile;
-    }
-
-    /**
-     * @param null|string $environmentFile
-     * @return self
-     */
-    public function setEnvironmentFile($environmentFile)
-    {
-        $this->environmentFile = $environmentFile;
-
-        return $this;
     }
 }
