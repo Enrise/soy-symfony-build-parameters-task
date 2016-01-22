@@ -1,5 +1,54 @@
 # Soy Symfony Build Parameters Task
 
+## Objective and Usage
+
+This task aims on generating the `parameters.yml` for symfony configurations, for that using environment strategies.
+
+### The default strategy does:
+
+1. Read a global environment file: `files/env/environment.global.yml`
+2. Read a environment file: `files/env/environment.dev.yml`
+3. Reads a templace file: `app/config/parameters.dist.yml`
+4. Generates the final parameters file: `app/config/parameters.yml`
+
+### You can do it without interaction just by creating simple recipes like:
+```php
+<?php
+
+use Enrise\Soy\SymfonyBuildParameters\ParametersTask;
+use Enrise\Soy\SymfonyBuildParameters\PrepareEnvironmentTask;
+use Enrise\Soy\SymfonyBuildParameters\PrepareSymfonyEnvironmentTask;
+
+$recipe = new \Soy\Recipe();
+
+$recipe->component('symfony-parameters', function (PrepareSymfonyEnvironmentTask $environmentTask) {
+    $environmentTask
+        ->run();
+})
+    ->cli([ParametersTask::class, 'prepareCli'])
+    ->cli([PrepareEnvironmentTask::class, 'prepareCli'])
+    ->cli([PrepareSymfonyEnvironmentTask::class, 'prepareCli'])
+;
+```
+
+### And then run:
+```
+# ./vendor/bin/soy symfony-parameters
+```
+
+### Result:
+```
+Running Enrise\Soy\SymfonyBuildParameters\PrepareSymfonyEnvironmentTask
+Running Enrise\Soy\SymfonyBuildParameters\PrepareEnvironmentTask
+	Template file app/config/parameters.yml.dist
+	Destination file app/config/parameters.yml
+	Destination file will be replaced
+Running Enrise\Soy\SymfonyBuildParameters\ParametersTask
+	Read environment file files/environment/environment.local.yml
+	Read global environment file files/environment/environment.global.yml
+app/config/parameters.yml file generated successfully
+```
+
 ## Basic recipe can look like
 
 ```php
