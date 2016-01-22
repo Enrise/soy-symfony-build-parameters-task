@@ -1,5 +1,6 @@
 <?php
 
+use Enrise\Soy\SymfonyBuildParameters\ParametersTask;
 use Enrise\Soy\SymfonyBuildParameters\PrepareEnvironmentTask;
 use Enrise\Soy\SymfonyBuildParameters\PrepareSymfonyEnvironmentTask;
 
@@ -9,6 +10,7 @@ $recipe->component('default', function (PrepareSymfonyEnvironmentTask $environme
     $environmentTask
         ->run();
 })
+    ->cli([ParametersTask::class, 'prepareCli'])
     ->cli([PrepareEnvironmentTask::class, 'prepareCli'])
     ->cli([PrepareSymfonyEnvironmentTask::class, 'prepareCli'])
 ;

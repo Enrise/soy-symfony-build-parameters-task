@@ -7,6 +7,12 @@ use Soy\Task\TaskInterface;
 
 class PrepareSymfonyEnvironmentTask implements TaskInterface
 {
+    const CLI_ARG_ENV_DEFAULT = 'dev';
+
+    const CLI_ARG_DEST_FILE_DEFAULT = 'app/config/parameters.yml';
+
+    const CLI_ARG_SRC_FILE_DEFAULT = 'app/config/parameters.yml.dist';
+
     /**
      * @var PrepareEnvironmentTask
      */
@@ -28,8 +34,6 @@ class PrepareSymfonyEnvironmentTask implements TaskInterface
      */
     public function __construct(PrepareEnvironmentTask $prepareEnvironmentTask, CLImate $climate)
     {
-        $prepareEnvironmentTask->setSourceFile('app/config/parameters.yml.dist');
-
         $this->prepareEnvironmentTask = $prepareEnvironmentTask;
         $this->climate = $climate;
     }
@@ -39,21 +43,15 @@ class PrepareSymfonyEnvironmentTask implements TaskInterface
      */
     public function run()
     {
-        $envFile = $this->climate->arguments->get(PrepareEnvironmentTask::CLI_ARG_ENV_FILE);
-        if ($envFile !== null) {
-            $this->environmentFile = $envFile;
-        }
-
-        if ($this->environmentFile !== null) {
-            $this->prepareEnvironmentTask->setEnvFile($this->environmentFile);
-        }
 
         $this->prepareEnvironmentTask->setEnclosingParamSymbol('%');
         $this->prepareEnvironmentTask->run();
     }
 
     /**
-     * When linked as callback for Soy's prepare, adds a command line argument for this task.
+     * Since SymfonyTask inherits from EnvironmentTask we are setting
+     * the default output file as symfony standard parameters.yml
+     * as well for the source file which is parameters.yml.dist
      *
      * @param CLImate $climate
      * @throws \Exception
@@ -61,9 +59,18 @@ class PrepareSymfonyEnvironmentTask implements TaskInterface
     public static function prepareCli(CLImate $climate)
     {
         $args = $climate->arguments->all();
-        $output = $args[PrepareEnvironmentTask::CLI_ARG_DEST_FILE];
-        $output->setDefaultValue('app/config/parameters.yml');
-        $output->setValue('app/config/parameters.yml');
+
+        $destFile = $args[PrepareEnvironmentTask::CLI_ARG_DEST_FILE];
+        $destFile->setDefaultValue(static::CLI_ARG_DEST_FILE_DEFAULT);
+        $destFile->setValue(static::CLI_ARG_DEST_FILE_DEFAULT);
+
+        $srcFile = $args[PrepareEnvironmentTask::CLI_ARG_SRC_FILE];
+        $srcFile->setDefaultValue(static::CLI_ARG_SRC_FILE_DEFAULT);
+        $srcFile->setValue(static::CLI_ARG_SRC_FILE_DEFAULT);
+
+        $env = $args[ParametersTask::CLI_ARG_ENV];
+        $env->setDefaultValue(static::CLI_ARG_ENV_DEFAULT);
+        $env->setValue(static::CLI_ARG_ENV_DEFAULT);
     }
 
     /**
@@ -81,6 +88,7 @@ class PrepareSymfonyEnvironmentTask implements TaskInterface
     public function setEnvironmentFile($environmentFile)
     {
         $this->environmentFile = $environmentFile;
+
         return $this;
     }
 }

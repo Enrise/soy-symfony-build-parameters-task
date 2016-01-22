@@ -8,8 +8,9 @@ use Soy\Task\TaskInterface;
 
 class PrepareEnvironmentTask implements TaskInterface
 {
-    const CLI_ARG_ENV_FILE = 'env-file';
     const CLI_ARG_DEST_FILE = 'dest-file';
+
+    const CLI_ARG_SRC_FILE = 'src-file';
 
     /**
      * @var ParametersTask
@@ -64,17 +65,17 @@ class PrepareEnvironmentTask implements TaskInterface
      */
     public function run()
     {
-        if (!$this->destinationFile) {
+        if (! $this->destinationFile) {
             $this->destinationFile = $this->climate->arguments->get(self::CLI_ARG_DEST_FILE);
+        }
+
+        if (! $this->sourceFile) {
+            $this->sourceFile = $this->climate->arguments->get(self::CLI_ARG_SRC_FILE);
         }
 
         if ($this->sourceFile === null || $this->destinationFile === null) {
             $exceptionMessage = sprintf('Please provide a source and destination file for %s', self::class);
             throw new \RuntimeException($exceptionMessage);
-        }
-
-        if ($this->envFile !== null) {
-            $this->parametersTask->setEnvironmentFilename($this->envFile);
         }
 
         $this->parametersTask->run();
@@ -89,10 +90,13 @@ class PrepareEnvironmentTask implements TaskInterface
         $this->replaceTask
             ->setReplacements($replacements)
             ->setSource($this->sourceFile)
-            ->setDestination($this->destinationFile)
-        ;
+            ->setDestination($this->destinationFile);
 
         $this->replaceTask->run();
+
+        if (is_readable($this->destinationFile)) {
+            $this->climate->blue($this->destinationFile . ' file generated successfully');
+        }
     }
 
     /**
@@ -105,19 +109,19 @@ class PrepareEnvironmentTask implements TaskInterface
     public static function prepareCli(CLImate $climate)
     {
         $climate->arguments->add([
-            self::CLI_ARG_ENV_FILE => [
-                'longPrefix' => self::CLI_ARG_ENV_FILE,
-                'description' => 'The environment file that contains the parameters',
-                'required' => false
-            ]
-        ]);
-
-        $climate->arguments->add([
             self::CLI_ARG_DEST_FILE => [
                 'longPrefix' => self::CLI_ARG_DEST_FILE,
                 'description' => 'The destination file',
-                'required' => false
-            ]
+                'required' => false,
+            ],
+        ]);
+
+        $climate->arguments->add([
+            self::CLI_ARG_SRC_FILE => [
+                'longPrefix' => self::CLI_ARG_SRC_FILE,
+                'description' => 'The source file used as template for generating the dist file',
+                'required' => false,
+            ],
         ]);
     }
 
@@ -136,6 +140,7 @@ class PrepareEnvironmentTask implements TaskInterface
     public function setSourceFile($sourceFile)
     {
         $this->sourceFile = $sourceFile;
+
         return $this;
     }
 
@@ -154,6 +159,7 @@ class PrepareEnvironmentTask implements TaskInterface
     public function setDestinationFile($destinationFile)
     {
         $this->destinationFile = $destinationFile;
+
         return $this;
     }
 
@@ -164,6 +170,7 @@ class PrepareEnvironmentTask implements TaskInterface
     public function setEnclosingParamSymbol($enclosingSymbol)
     {
         $this->enclosingSymbol = $enclosingSymbol;
+
         return $this;
     }
 
@@ -174,6 +181,7 @@ class PrepareEnvironmentTask implements TaskInterface
     public function setEnvFile($envFile)
     {
         $this->envFile = $envFile;
+
         return $this;
     }
 }
