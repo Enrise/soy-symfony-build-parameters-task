@@ -1,5 +1,13 @@
 # Soy Symfony Build Parameters Task
 
+## Install
+
+This task is available as package at: https://packagist.org/packages/enrise/soy-symfony-build-parameters-task
+
+You can run: `composer require enrise/soy-symfony-build-parameters-task`
+
+After installing you can follow the usage below, if you don't know soy, first check: https://github.com/soy-php/soy
+
 ## Objective and Usage
 
 This task aims on generating the `parameters.yml` for symfony configurations, for that using environment strategies.
