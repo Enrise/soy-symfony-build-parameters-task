@@ -131,7 +131,7 @@ class PrepareEnvironmentTask implements TaskInterface
         $climate->arguments->add([
             self::CLI_ARG_SRC_FILE => [
                 'longPrefix' => self::CLI_ARG_SRC_FILE,
-                'description' => 'The source file used as template for generating the dist file',
+                'description' => 'The source file used as template for generating the destination file',
                 'required' => false,
             ],
         ]);

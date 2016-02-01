@@ -12,6 +12,10 @@ class ParametersTask implements TaskInterface
 
     const CLI_ARG_ENV_PATH = 'env-path';
 
+    const CLI_ARG_ENV_FILE = 'env-file';
+
+    const CLI_ARG_GLOBAL_FILE = 'global-file';
+
     const ENVIRONMENT_FILENAME_MASK = 'environment.%s.yml';
 
     const ENVIRONMENT_FILE_PATH_DEFAULT = 'files/environment';
@@ -56,6 +60,11 @@ class ParametersTask implements TaskInterface
     {
         $this->climate->green('Running ' . self::class);
 
+        $forcedEnvFile = $this->climate->arguments->get(static::CLI_ARG_ENV_FILE);
+        if ($forcedEnvFile && ! $this->getEnvFile()) {
+            $this->setEnvFile($forcedEnvFile);
+        }
+
         if (! $this->getEnv()) {
             $this->setEnv($this->climate->arguments->get(static::CLI_ARG_ENV));
         }
@@ -72,13 +81,18 @@ class ParametersTask implements TaskInterface
         $this->climate->tab()->white('Read environment file ' . $this->getEnvFile());
         $envParams = $this->readParamsFromFile($this->getEnvFile());
 
+        $forcedGlobalFile = $this->climate->arguments->get(static::CLI_ARG_GLOBAL_FILE);
+        if ($forcedGlobalFile && ! $this->getGlobalEnvFile()) {
+            $this->setGlobalEnvFile($forcedGlobalFile);
+        }
+
         if (! $this->getGlobalEnvFile()) {
             $this->setGlobalEnvFile($this->getEnvFilename('global'));
         }
 
         if (! is_readable($this->getGlobalEnvFile())) {
             $this->climate->tab()->yellow(
-                'No global file found, proceeding without it. Tried file: ' . $this->getGlobalEnvFile()
+                'Global file not found or not readable, proceeding without it. Tried file: ' . $this->getGlobalEnvFile()
             );
         }
 
@@ -110,6 +124,26 @@ class ParametersTask implements TaskInterface
             self::CLI_ARG_ENV => [
                 'longPrefix' => self::CLI_ARG_ENV,
                 'description' => 'The current environment name. I.E.: dev, test, prod',
+                'required' => false,
+            ],
+        ]);
+
+        $climate->arguments->add([
+            self::CLI_ARG_ENV_FILE => [
+                'longPrefix' => self::CLI_ARG_ENV_FILE,
+                'description' => sprintf(
+                    'This option will ignore both "%s" and "%s" in order to force the file to use',
+                    static::CLI_ARG_ENV,
+                    static::CLI_ARG_ENV_PATH
+                ),
+                'required' => false,
+            ],
+        ]);
+
+        $climate->arguments->add([
+            self::CLI_ARG_GLOBAL_FILE => [
+                'longPrefix' => self::CLI_ARG_GLOBAL_FILE,
+                'description' => 'This option will force the global file to be used',
                 'required' => false,
             ],
         ]);

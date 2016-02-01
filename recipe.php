@@ -16,10 +16,9 @@ $recipe->component('default', function (PrepareSymfonyEnvironmentTask $environme
 ;
 
 $recipe->component(
-    'symfony-local',
+    'symfony-dev',
     function (PrepareSymfonyEnvironmentTask $sfEnvironmentTask, ParametersTask $parametersTask) {
-        $parametersTask->setEnv('local');
-        $parametersTask->setGlobalEnvFile('testglobalfile');
+        $parametersTask->setEnv('dev');
         $sfEnvironmentTask
             ->run();
     }
