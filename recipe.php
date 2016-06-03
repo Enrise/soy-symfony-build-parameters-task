@@ -4,6 +4,12 @@ use Enrise\Soy\SymfonyBuildParameters\ParametersTask;
 use Enrise\Soy\SymfonyBuildParameters\PrepareEnvironmentTask;
 use Enrise\Soy\SymfonyBuildParameters\PrepareSymfonyEnvironmentTask;
 
+// Example usage
+// ParametersTask::$environmentFilenameMask = 'my.yml';
+// ParametersTask::$environmentFilePath = '../some/relative/or/full/path/';
+// PrepareSymfonyEnvironmentTask::$cliArgSrcFile = '../some/relative/or/full/path/app/config/parameters.yml.dist';
+// PrepareSymfonyEnvironmentTask::$cliArgDestFile = '../some/relative/or/full/path/app/config/parameters.yml';
+
 $recipe = new \Soy\Recipe();
 
 $recipe->component('default', function (PrepareSymfonyEnvironmentTask $environmentTask) {

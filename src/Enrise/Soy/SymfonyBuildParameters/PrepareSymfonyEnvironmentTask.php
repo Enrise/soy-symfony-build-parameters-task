@@ -11,9 +11,15 @@ class PrepareSymfonyEnvironmentTask implements TaskInterface
 
     const CLI_ARG_ENV_DEFAULT = 'dev';
 
-    const CLI_ARG_DEST_FILE_DEFAULT = 'app/config/parameters.yml';
+    /**
+     * @var string
+     */
+    public static $cliArgSrcFile = 'app/config/parameters.yml.dist';
 
-    const CLI_ARG_SRC_FILE_DEFAULT = 'app/config/parameters.yml.dist';
+    /**
+     * @var string
+     */
+    public static $cliArgDestFile = 'app/config/parameters.yml';
 
     /**
      * @var PrepareEnvironmentTask
@@ -71,7 +77,7 @@ class PrepareSymfonyEnvironmentTask implements TaskInterface
             );
         }
 
-        $this->prepareEnvironmentTask->setEnclosingParamSymbol('%');
+        $this->prepareEnvironmentTask->setEnclosingParamSymbol('&');
         $this->prepareEnvironmentTask->run();
     }
 
@@ -88,12 +94,12 @@ class PrepareSymfonyEnvironmentTask implements TaskInterface
         $args = $climate->arguments->all();
 
         $destFile = $args[PrepareEnvironmentTask::CLI_ARG_DEST_FILE];
-        $destFile->setDefaultValue(static::CLI_ARG_DEST_FILE_DEFAULT);
-        $destFile->setValue(static::CLI_ARG_DEST_FILE_DEFAULT);
+        $destFile->setDefaultValue(self::$cliArgDestFile);
+        $destFile->setValue(self::$cliArgDestFile);
 
         $srcFile = $args[PrepareEnvironmentTask::CLI_ARG_SRC_FILE];
-        $srcFile->setDefaultValue(static::CLI_ARG_SRC_FILE_DEFAULT);
-        $srcFile->setValue(static::CLI_ARG_SRC_FILE_DEFAULT);
+        $srcFile->setDefaultValue(self::$cliArgSrcFile);
+        $srcFile->setValue(self::$cliArgSrcFile);
 
         $env = $args[ParametersTask::CLI_ARG_ENV];
         $env->setDefaultValue(static::CLI_ARG_ENV_DEFAULT);

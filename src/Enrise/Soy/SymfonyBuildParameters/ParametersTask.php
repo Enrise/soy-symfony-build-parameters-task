@@ -16,9 +16,15 @@ class ParametersTask implements TaskInterface
 
     const CLI_ARG_GLOBAL_FILE = 'global-file';
 
-    const ENVIRONMENT_FILENAME_MASK = 'environment.%s.yml';
+    /**
+     * @var string
+     */
+    public static $environmentFilenameMask = 'environment.%s.yml';
 
-    const ENVIRONMENT_FILE_PATH_DEFAULT = 'files/environment';
+    /**
+     * @var string
+     */
+    public static $environmentFilePath = 'files/environment';
 
     /**
      * @var string
@@ -73,7 +79,7 @@ class ParametersTask implements TaskInterface
             $this->setEnvFile($this->getEnvFilename());
         }
 
-        if (! is_readable($this->getEnvFile())) {
+        if (! file_exists($this->getEnvFile())) {
             $this->climate->tab()->red('Unable to read file: ' . $this->getEnvFile());
             die(21);
         }
@@ -90,14 +96,14 @@ class ParametersTask implements TaskInterface
             $this->setGlobalEnvFile($this->getEnvFilename('global'));
         }
 
-        if (! is_readable($this->getGlobalEnvFile())) {
+        if (! file_exists($this->getGlobalEnvFile())) {
             $this->climate->tab()->yellow(
                 'Global file not found or not readable, proceeding without it. Tried file: ' . $this->getGlobalEnvFile()
             );
         }
 
         $distEnvironmentParameters = [];
-        if (is_readable($this->getGlobalEnvFile())) {
+        if (file_exists($this->getGlobalEnvFile())) {
             $this->climate->tab()->white('Read global environment file ' . $this->getGlobalEnvFile());
             $distEnvironmentParameters = $this->readParamsFromFile($this->getGlobalEnvFile());
         }
@@ -115,7 +121,7 @@ class ParametersTask implements TaskInterface
             self::CLI_ARG_ENV_PATH => [
                 'longPrefix' => self::CLI_ARG_ENV_PATH,
                 'description' => 'The directory which contains the env files',
-                'defaultValue' => static::ENVIRONMENT_FILE_PATH_DEFAULT,
+                'defaultValue' => self::$environmentFilePath,
                 'required' => false,
             ],
         ]);
@@ -214,7 +220,7 @@ class ParametersTask implements TaskInterface
 
         $path = $args->get(static::CLI_ARG_ENV_PATH);
 
-        return sprintf($path . '/' . static::ENVIRONMENT_FILENAME_MASK, $env);
+        return sprintf($path . '/' . self::$environmentFilenameMask, $env);
     }
 
     /**
