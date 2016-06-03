@@ -81,7 +81,7 @@ class PrepareEnvironmentTask implements TaskInterface
         }
 
         $this->climate->tab()->white('Template file ' . $this->sourceFile);
-        if (! is_readable($this->sourceFile)) {
+        if (! file_exists($this->sourceFile)) {
             $this->climate->tab()->red('Unable to read file: ' . $this->sourceFile);
             die(22);
         }
@@ -106,7 +106,7 @@ class PrepareEnvironmentTask implements TaskInterface
 
         $this->replaceTask->run();
 
-        if (is_readable($this->destinationFile)) {
+        if (file_exists($this->destinationFile)) {
             $this->climate->bold()->blue($this->destinationFile . ' file generated successfully');
         }
     }
